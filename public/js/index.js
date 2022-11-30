@@ -4,6 +4,7 @@ const DEFAULTS = {
 	ROTATION_SPEED: 2,
 };
 
+// test data
 const NANJING = [118.7965, 32.0584];
 const MONTREAL = [-73.5673, 45.5017];
 const SHANGHAI = [121.4737, 31.2304];
@@ -22,38 +23,71 @@ const map = new mapboxgl.Map({
 	projection: 'naturalEarth' // starting projection
 });
 
-const point = {
-	'type': 'FeatureCollection',
-	'features': [
-		{
-			'type': 'Feature',
-			'properties': {
-				bearing: -30,
-			},
-			'geometry': {
-				'type': 'Point',
-				'coordinates': NANJING
-			}
-		}
-	]
-};
+// const locations = {
+// 	'type': 'FeatureCollection',
+// 	'features': [NANJING, MONTREAL, SHANGHAI].map((coordinates, i) => ({
+// 		'type': 'Feature',
+// 		'properties': {
+// 			bearing: 90,
+// 			color: i ? "#0bd" : "#fe3"
+// 		},
+// 		'geometry': {
+// 			'type': 'Point',
+// 			'coordinates': coordinates
+// 		}
+// 	}))
+// };
 
 const locations = {
 	'type': 'FeatureCollection',
-	'features': [NANJING, MONTREAL, SHANGHAI].map((coordinates, i) => ({
+	'features': []
+};
+
+function addPlayer(player, isMe) {
+	locations.features.push({
 		'type': 'Feature',
 		'properties': {
 			bearing: 90,
-			color: i ? "#0bd" : "#fe3"
+			color: isMe ? "#fe3" : "#0bd",
+			id: player.id
 		},
 		'geometry': {
 			'type': 'Point',
-			'coordinates': coordinates
+			'coordinates': player.coordinates
 		}
-	}))
+	});
 }
 
-map.on('load', () => {
+const socket = io();
+socket.on("connect", async () => {
+	console.log("connected", socket.id);
+
+	const response = await fetch('/api/online');
+	const { data } = await response.json();
+	data.forEach((player) => {
+		addPlayer(player, false);
+	});
+});
+socket.on('addPlayer', (data) => {
+	addPlayer(data, false);
+});
+socket.on('removePlayer', (data) => {
+	const { id } = data;
+	const index = locations.features.findIndex((feature) => feature.properties.id === id);
+	if (index >= 0) {
+		locations.features.splice(index, 1);
+	}
+});
+socket.on('updatePlayer', (data) => {
+	const { id, coordinates } = data;
+	const index = locations.features.findIndex((feature) => feature.properties.id === id);
+	if (index >= 0) {
+		locations.features[index].geometry.coordinates = coordinates;
+	}
+});
+
+map.on('load', async () => {
+
 	const destination = new mapboxgl.Marker()
 		.setLngLat(BERLIN)
 		.addTo(map);
@@ -80,15 +114,39 @@ map.on('load', () => {
 		}
 	});
 
-	let speed = DEFAULTS.SPEED;
+	// ----------------------------
+
+	let speed = 0;
 	let rotationSpeed = DEFAULTS.ROTATION_SPEED;
-
 	let playing = true;
-
 	let bearing = 90; // 90 = north, counter-clockwise
 
+	// TODO
+	// socket.on('start', () => {
+	// 	//
+	// });
+
+	const lonLat = await getLonLat();
+	const { id } = socket;
+	addPlayer({ id, coordinates: lonLat }, true);
+	socket.emit('addPlayer', { id, coordinates: lonLat });
+
 	window.addEventListener('keydown', (e) => {
-		console.log(e);
+		// console.log(e);
+
+		const point = locations.features.find((feature) => feature.properties.id === id);
+		if (!point) {
+			return;
+		}
+		const from = turf.point(point.geometry.coordinates);
+		const to = turf.point(BERLIN);
+		const distance = turf.distance(from, to, { units: 'kilometers' });
+		// console.log(distance);
+		if (distance < 400) {
+			speed = 0;
+			return;
+		}
+
 		if (e.key === '0') { // for debug
 			playing = !playing;
 			if (playing) {
@@ -102,22 +160,24 @@ map.on('load', () => {
 			bearing -= rotationSpeed;
 		} else {
 			return;
-		}
-
-		const point = locations.features[0];
+		}	
 		point.properties.bearing = bearing;
 	});
 
 	function animate() {
 		if (!playing) return;
 
-		const point = locations.features[0];
+		const point = locations.features.find((feature) => feature.properties.id === id);
 		const radian = bearing * Math.PI / 180;
 		const coordinates = point.geometry.coordinates;
 		coordinates[0] = addLon(coordinates[0], speed * Math.cos(radian));
 		coordinates[1] = addLat(coordinates[1], speed * Math.sin(radian));
 		// console.log(point.geometry.coordinates);
 		map.getSource('point').setData(locations);
+
+		if (speed > 0) {
+			socket.emit('updatePlayer', { id, coordinates });
+		}
 
 		requestAnimationFrame(animate);
 	}
@@ -148,4 +208,14 @@ function addLat(lat, delta) {
 
 function clamp(v, min, max) {
 	return Math.min(Math.max(v, min), max);
+}
+
+async function getLonLat() {
+	return new Promise((resolve, reject) => {
+		navigator.geolocation.getCurrentPosition((position) => {
+			resolve([position.coords.longitude, position.coords.latitude]);
+		}, (err) => {
+			reject(err);
+		});
+	});
 }
