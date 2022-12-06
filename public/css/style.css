@@ -1,11 +1,65 @@
 body {
 	margin: 0;
+	background-color: #000;
 }
+
+button {
+  border-radius: 0.5rem;
+  border: 1px solid transparent;
+  padding: 0.6rem 1.2rem;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1677ff;
+  cursor: pointer;
+  transition: border-color 0.25s;
+	color: #fff;
+}
+button[disabled] {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+button:hover {
+	background-color: #4096ff;
+}
+
+.view {
+	position: fixed;
+	width: 100vw;
+	height: 100vh;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	backdrop-filter: blur(5px);
+}
+
+.view:not(.active) {
+	display: none;
+}
+
+.dialog {
+	width: 40vw;
+	height: 60vh;
+	min-height: 500px;
+	border-radius: 1rem;
+	border: 1px solid #ccc;
+	/* background-color: #fff; */
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 1rem;
+}
+
+.label {
+	color: #888;
+	font-size: 1.2rem;
+	font-weight: 500;
+	margin: 1rem;
+}
+
 #map {
-	position: absolute;
-	top: 0;
-	bottom: 0;
-	width: 100%;
+	position: fixed;
+	width: 100vw;
+	height: 100vh;
 }
 
 #slogan {
@@ -16,4 +70,51 @@ body {
 	opacity: 0.5;
 	text-align: center;
 	font-size: 4rem;
+}
+
+.input-container {
+	width: 50%;
+}
+
+.mapboxgl-ctrl-geocoder {
+	min-width: 100%;
+}
+
+#airplane-color {
+	width: 3rem;
+	height: 3rem;
+	position: relative;
+}
+
+#airplane-color input {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	opacity: 0;
+	cursor: pointer;
+}
+
+#airplane-icon {
+	width: 3rem;
+	height: 3rem;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+	font-size: 3rem;
+	text-align: center;
+	line-height: 3rem;
+	vertical-align: baseline;
+	background-color: #333;
+	user-select: none;
+}
+
+.explanation {
+	color: #888;
+	margin: 1rem;
+}
+
+#button-start {
+	margin-top: 1rem;
+	width: 8rem;
 }

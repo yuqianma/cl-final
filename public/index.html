@@ -5,15 +5,40 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
 	<title>CL Final</title>
-	<link href="./css/style.css" rel="stylesheet">
 	<link href="https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.css" rel="stylesheet">
 	<script src="https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.js"></script>
+	<link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css" rel="stylesheet">
+	<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/socket.io-client@4.5.3/dist/socket.io.min.js"></script>
+	<link href="./css/style.css" rel="stylesheet">
 </head>
 <body>
 	<div id="map"></div>
-	<div id="slogan">Let's go to Berlin!</div>
+	<!-- <div id="slogan">Let's go to Berlin!</div> -->
+	<div id="boarding" class="view active">
+		<div class="dialog">
+			<div class="label">Your name</div>
+			<div class="input-container">
+				<div class="mapboxgl-ctrl-geocoder">
+					<input id="input-player-name" class="mapboxgl-ctrl-geocoder--input" type="text" placeholder="Enter your name">
+				</div>
+			</div>
+			<div class="label">Take off from</div>
+			<div id="geocoder" class="input-container"></div>
+			<div class="label">To Berlin!</div>
+			<div class="label">Choose your color</div>
+			<div id="airplane-color">
+				<div id="airplane-icon">✈</div>
+				<input id="input-airplane-color" type="color"/>
+			</div>
+			<button id="button-start" disabled>Loading</button>
+			<div class="explanation">
+				<p>Tips:</p>
+				Press the space bar to take off! Key ← & → to turn!
+			</div>
+		</div>
+	</div>
 </body>
 <script type="module" src="./js/index.js"></script>
 </html>

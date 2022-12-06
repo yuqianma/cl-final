@@ -10,6 +10,7 @@ const port = 3000;
 app.use(express.json());
 app.use(express.static("public"));
 
+// id, name, color, bearing, coordinateList
 const players = [];
 
 app.get('/api/online', (req, res) => {
@@ -22,17 +23,22 @@ io.on('connection', (socket) => {
 	const { id } = socket;
 	socket.on('addPlayer', (data) => {
 		console.log('addPlayer', data);
-		players.push({ ...data });
+		players.push({ ...data, coordinateList: [data.coordinates] });
 		socket.broadcast.emit('addPlayer', data);
 	});
 	socket.on('updatePlayer', (data) => {
 		console.log('updatePlayer', data);
-		players.find((player) => player.id === id).coordinates = data.coordinates;
+		const player = players.find((player) => player.id === id);
+		if (player) {
+			player.coordinateList.push(data.coordinates);
+		}
 		socket.broadcast.emit('updatePlayer', data);
 	});
 	socket.on('disconnect', () => {
 		const index = players.findIndex((player) => player.id === id);
-		players.splice(index, 1);
+		if (index >= 0) {
+			players.splice(index, 1);
+		}
 		socket.broadcast.emit('removePlayer', { id });
     console.log('user disconnected');
   });
