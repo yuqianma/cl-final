@@ -1,3 +1,4 @@
+import { LOCATIONS } from "./constants.js";
 
 const fetchOnlinePlayers = () => fetch('/api/online').then((response) => response.json());
 
@@ -78,7 +79,36 @@ function createStore(state = initState) {
 			state.players.features[index].geometry.coordinates = coordinates;
 			state.trails.features[index].geometry.coordinates.push(coordinates);
 		}
-		// TODO: check all players distances to Berlin
+	}
+
+	const to = turf.point(LOCATIONS.BERLIN);
+	const distanceDelta = 600;
+
+	function haveIArrived() {
+		const feature = state.players.features.find((feature) => feature.properties.id === state.id);
+		if (!feature) {
+			return false;
+		}
+		const from = feature.geometry.coordinates;
+		const distance = turf.distance(from, to, { units: 'kilometers' });
+		return distance < distanceDelta;
+	}
+
+	// more than two players and everyone has arrived in Berlin
+	function haveAllArrived() {
+		// if (state.players.features.length === 0) {
+		// 	return false;
+		// }
+		if (state.players.features.length < 2) {
+			return false;
+		}
+		const result = state.players.features.every((feature) => {
+			const from = feature.geometry.coordinates;
+			const distance = turf.distance(from, to, { units: 'kilometers' });
+			return distance < distanceDelta;
+		});
+		// console.log('haveAllArrived', result);
+		return result;
 	}
 
 	const socket = io();
@@ -121,6 +151,8 @@ function createStore(state = initState) {
 		getSocket: () => socket,
 		addMe,
 		updateMyLocation,
+		haveIArrived,
+		haveAllArrived,
 	};	
 }
 

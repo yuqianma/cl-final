@@ -148,3 +148,11 @@ kbd {
 	margin-top: 1rem;
 	width: 8rem;
 }
+
+.popup .mapboxgl-popup-content {
+	background-color: rgba(255, 255, 255, .5);
+}
+
+.popup img {
+	max-width: 500px;
+}

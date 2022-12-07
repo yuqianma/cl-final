@@ -1,11 +1,7 @@
-import { DEFAULTS } from "./constants.js";
+import { DEFAULTS, LOCATIONS } from "./constants.js";
 import { store } from "./store.js";
 
-// test data
-const NANJING = [118.7965, 32.0584];
-const MONTREAL = [-73.5673, 45.5017];
-const SHANGHAI = [121.4737, 31.2304];
-const BERLIN = [13.4050, 52.5200];
+const BERLIN = LOCATIONS.BERLIN;
 
 function initMap() {
 	const map = new mapboxgl.Map({
@@ -26,29 +22,56 @@ function initMap() {
 	map.on('load', () => {
 		onMapLoad(map);
 	});
+
+	window._map = map;
 }
 
-function onMapLoad(map) {	
+const audioCongrats = new Audio('./assets/欢呼喝彩音效.mp3');
+
+function onMapLoad(map) {
+
+	let popup = null;
+	function showPopup() {
+		if (popup) return;
+		popup = new mapboxgl.Popup({
+			anchor: 'top',
+			className: 'popup',
+			maxWidth: 'none',
+			closeOnClick: false,
+			focusAfterOpen: false,
+		})
+		.setLngLat(BERLIN)
+		.setHTML('<img src="./assets/congrats4.gif"/>')
+		.addTo(map);
+
+		audioCongrats.currentTime = 0;
+		audioCongrats.play();
+	}
+	function hidePopup() {
+		if (popup) {
+			popup.remove();
+			popup = null;
+		}
+
+		audioCongrats.pause();
+	}
+
+	// showPopup();
+
+	const destination = {
+		'type': 'Feature',
+		'properties': {
+			'arrived': false,
+		},
+		'geometry': {
+			'type': 'Point',
+			'coordinates': BERLIN
+		}
+	};
+
 	map.addSource('destination', {
 		'type': 'geojson',
-		'data': {
-			'type': 'Feature',
-			'geometry': {
-				'type': 'Point',
-				'coordinates': BERLIN
-			}
-		}
-	});
-    
-	map.addLayer({
-			"id": "point-glow-strong",
-			"type": "circle",
-			"source": "destination",
-			"paint": {
-					"circle-radius": 10,
-					"circle-color": "#00e673",
-					"circle-opacity": .8
-			}
+		'data': destination
 	});
 
 	map.addLayer({
@@ -61,6 +84,24 @@ function onMapLoad(map) {
 					"circle-opacity": 0.4
 			}
 	});
+
+	map.addLayer({
+		"id": "point-glow-strong",
+		"type": "circle",
+		"source": "destination",
+		"paint": {
+				"circle-radius": 10,
+				// "circle-color": "#00e673",
+				// "circle-color": "#ffee33",
+				"circle-color": [
+					'case',
+					['get', 'arrived'],
+					'#ffee33',
+					'#00e673'
+				],
+				"circle-opacity": .8
+		}
+});
 
 	map.addLayer({
 		'id': 'label',
@@ -125,6 +166,15 @@ function onMapLoad(map) {
 		// console.log(state);
 		map.getSource('players').setData(state.players);
 		map.getSource('trails').setData(state.trails);
+
+		destination.properties.arrived = store.haveIArrived();
+		map.getSource('destination').setData(destination);
+
+		if (store.haveAllArrived()) {
+			showPopup();
+		} else {
+			hidePopup();
+		}
 
 		requestAnimationFrame(animate);
 	}
