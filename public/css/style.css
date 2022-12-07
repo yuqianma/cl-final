@@ -72,6 +72,17 @@ button:hover {
 	font-size: 4rem;
 }
 
+#player-list {
+	position: fixed;
+	padding: 1rem;
+	color: #fff;
+	line-height: 1.5;
+}
+
+.player-list-icon {
+	margin-right: 0.5rem;
+}
+
 .input-container {
 	width: 50%;
 }

@@ -14,11 +14,12 @@ function initMap() {
 		style: 'mapbox://styles/mapbox/dark-v11',
 		center: [0, 0],
 		zoom: 1.8,
-		// interactive: false,
-		dragPan: false,
-		dragRotate: false,
-		keyboard: false,
+		interactive: false,
+		// dragPan: false,
+		// dragRotate: false,
+		// keyboard: false,
 		projection: 'naturalEarth' // starting projection
+		// projection: 'mercator'
 	});
 
 	map.on('load', () => {
@@ -137,7 +138,7 @@ export function start(player) {
 		// 	return;
 		// }
 
-		if (e.key === ' ' || e.key === 'ArrowUp') {
+		if (e.key === ' ') {
 			speed = speed === DEFAULTS.SPEED ? 0 : DEFAULTS.SPEED;
 		} else if (e.key === 'a' || e.key === 'ArrowLeft') {
 			bearing += rotationSpeed;

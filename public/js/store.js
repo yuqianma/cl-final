@@ -13,6 +13,19 @@ const initState = {
 	}
 };
 
+const playerList = document.getElementById('player-list');
+
+function appendPlayerName(id, name, color) {
+	const playerItem = document.createElement('div');
+	playerItem.id = `player-${id}`;
+	playerItem.innerHTML = `<span class="player-list-icon" style="color:${color};">⬤</span>${name}`;
+	playerList.appendChild(playerItem);
+}
+
+function removePlayerName(id) {
+	document.getElementById(`player-${id}`)?.remove();
+}
+
 function createStore(state = initState) {
 
 	// sync player including trail
@@ -42,6 +55,7 @@ function createStore(state = initState) {
 				'coordinates': coordinateList
 			}
 		});
+		appendPlayerName(id, name, color);
 	}
 
 	function addPlayer({ id, name, color, bearing, coordinates }) {
@@ -53,6 +67,7 @@ function createStore(state = initState) {
 		if (index >= 0) {
 			state.players.features.splice(index, 1);
 			state.trails.features.splice(index, 1);
+			removePlayerName(id);
 		}
 	}
 
