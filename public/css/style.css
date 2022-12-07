@@ -134,9 +134,14 @@ kbd {
 	user-select: none;
 }
 
-.explanation {
+.tips {
 	color: #888;
 	margin: 1rem;
+}
+.tips.bottom-right {
+	position: fixed;
+	right: 0;
+	bottom: 0;
 }
 
 #button-start {

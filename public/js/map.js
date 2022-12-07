@@ -14,6 +14,7 @@ function initMap() {
 		style: 'mapbox://styles/mapbox/dark-v11',
 		center: [0, 0],
 		zoom: 1.8,
+		attributionControl: false,
 		interactive: false,
 		// dragPan: false,
 		// dragRotate: false,
@@ -40,7 +41,7 @@ function onMapLoad(map) {
 	});
     
 	map.addLayer({
-			"id": "drone-glow-strong",
+			"id": "point-glow-strong",
 			"type": "circle",
 			"source": "destination",
 			"paint": {
@@ -51,7 +52,7 @@ function onMapLoad(map) {
 	});
 
 	map.addLayer({
-			"id": "drone-glow",
+			"id": "point-glow",
 			"type": "circle",
 			"source": "destination",
 			"paint": {
@@ -59,6 +60,22 @@ function onMapLoad(map) {
 					"circle-color": "#99ffcc",
 					"circle-opacity": 0.4
 			}
+	});
+
+	map.addLayer({
+		'id': 'label',
+		'source': 'destination',
+		'type': 'symbol',
+		'layout': {
+			'text-field': 'Berlin',
+			'text-size': 35,
+			'text-offset': [0, -1.1],
+			'text-allow-overlap': true,
+			'text-ignore-placement': true
+		},
+		"paint": {
+			'text-color': "#0b9" 
+		}
 	});
 
 	map.addSource('players', {
